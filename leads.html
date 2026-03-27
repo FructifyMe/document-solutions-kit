@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Document Solutions — North Shore Lead Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f9; color: #1a1a2e; }
+
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    color: white;
+    padding: 36px 48px 28px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header-left h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.3px; }
+  .header-left p { font-size: 13px; color: #a8b8d8; margin-top: 4px; }
+  .header-badge {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 12px;
+    text-align: right;
+    color: #c8d8f0;
+  }
+  .header-badge strong { display: block; font-size: 20px; color: white; margin-bottom: 2px; }
+
+  .stats-bar {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 16px 48px;
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-value { font-size: 22px; font-weight: 700; color: #0f3460; }
+  .stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  .filters {
+    padding: 20px 48px 0;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-btn {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1.5px solid #cbd5e1;
+    background: white;
+    font-size: 13px;
+    cursor: pointer;
+    color: #475569;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: #0f3460;
+    border-color: #0f3460;
+    color: white;
+  }
+
+  .table-wrap { padding: 20px 48px 48px; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); min-width: 900px; }
+  thead tr { background: #f8fafc; }
+  thead th {
+    text-align: left;
+    padding: 13px 16px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #64748b;
+    font-weight: 600;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+  }
+  tbody tr.lead-row {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+  tbody tr.lead-row:hover { background: #f8faff; }
+  tbody tr.lead-row:last-child { border-bottom: none; }
+  td { padding: 14px 16px; font-size: 13px; vertical-align: top; }
+
+  .lead-name { font-weight: 700; color: #1e293b; font-size: 14px; }
+  .lead-title { color: #64748b; font-size: 12px; margin-top: 2px; }
+  .lead-linkedin { font-size: 11px; color: #0077b5; text-decoration: none; display: inline-block; margin-top: 3px; }
+  .lead-linkedin:hover { text-decoration: underline; }
+
+  .company-name { font-weight: 600; color: #0f3460; }
+  .company-meta { color: #94a3b8; font-size: 11px; margin-top: 2px; }
+  .company-address { color: #64748b; font-size: 11px; margin-top: 1px; }
+
+  .industry-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+  }
+  .ind-architecture { background: #ede9fe; color: #5b21b6; }
+  .ind-legal { background: #dbeafe; color: #1d4ed8; }
+  .ind-construction { background: #fef3c7; color: #92400e; }
+  .ind-financial { background: #d1fae5; color: #065f46; }
+
+  .fit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .fit-strong { background: #dcfce7; color: #15803d; }
+  .fit-good { background: #fef9c3; color: #854d0e; }
+  .fit-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .fit-strong .fit-dot { background: #16a34a; }
+  .fit-good .fit-dot { background: #ca8a04; }
+
+  .contact-block { display: flex; flex-direction: column; gap: 4px; }
+  .contact-email {
+    color: #0f3460;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .contact-email:hover { text-decoration: underline; }
+  .contact-phone { color: #475569; font-size: 12px; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+  .contact-phone:hover { text-decoration: underline; color: #0f3460; }
+
+  .action-row { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+  .action-btn {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1.5px solid;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+    transition: all 0.12s;
+  }
+  .btn-call { background: white; border-color: #0f3460; color: #0f3460; }
+  .btn-call:hover { background: #0f3460; color: white; }
+  .btn-email { background: white; border-color: #16a34a; color: #16a34a; }
+  .btn-email:hover { background: #16a34a; color: white; }
+
+  .hook-cell { max-width: 220px; font-size: 12px; color: #475569; line-height: 1.5; }
+
+  /* Expand panel */
+  .detail-row { display: none; }
+  .detail-row.open { display: table-row; }
+  .detail-td { background: #f0f7ff; border-top: 1px solid #bfdbfe; border-bottom: 2px solid #93c5fd; padding: 0 !important; }
+  .detail-content {
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+  .detail-section h4 { font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 700; }
+  .detail-section p { font-size: 13px; color: #334155; line-height: 1.6; }
+  .detail-section strong { color: #1e293b; }
+  .detail-section em { font-style: italic; color: #475569; }
+
+  .row-num { color: #cbd5e1; font-weight: 700; font-size: 13px; }
+  .expanded-indicator { color: #0f3460; font-size: 10px; margin-left: 4px; }
+
+  /* Action plan bar */
+  .action-plan {
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    padding: 24px 48px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .action-plan-title { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 10px; }
+  .action-day { margin-bottom: 6px; font-size: 13px; color: #475569; }
+  .action-day strong { color: #0f3460; min-width: 80px; display: inline-block; }
+
+  .fructify-badge {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 12.5px;
+    color: #166534;
+    min-width: 240px;
+    flex-shrink: 0;
+  }
+  .fructify-badge strong { display: block; margin-bottom: 4px; }
+
+  .footer {
+    background: #1a1a2e;
+    color: #64748b;
+    text-align: center;
+    padding: 18px;
+    font-size: 12px;
+  }
+  .footer a { color: #a8b8d8; text-decoration: none; }
+
+  @media (max-width: 900px) {
+    .header, .stats-bar, .filters, .table-wrap, .action-plan { padding-left: 16px; padding-right: 16px; }
+    .detail-content { grid-template-columns: 1fr; }
+    .stats-bar { gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>North Shore Lead Dashboard</h1>
+    <p>Document Solutions &nbsp;·&nbsp; Jim Cross &nbsp;·&nbsp; Generated March 2026 &nbsp;·&nbsp; Powered by Apollo + Clay + Explorium</p>
+  </div>
+  <div class="header-badge">
+    <strong>10 Leads</strong>
+    5 Companies &nbsp;·&nbsp; Full contact data
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value">10</div><div class="stat-label">Total Leads</div></div>
+  <div class="stat"><div class="stat-value">5</div><div class="stat-label">Companies</div></div>
+  <div class="stat"><div class="stat-value">10</div><div class="stat-label">Verified Emails</div></div>
+  <div class="stat"><div class="stat-value">6</div><div class="stat-label">Strong ICP Fit</div></div>
+  <div class="stat"><div class="stat-value">925</div><div class="stat-label">Total Apollo Pool</div></div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="filterLeads('all', this)">All (10)</button>
+  <button class="filter-btn" onclick="filterLeads('architecture', this)">Architecture (2)</button>
+  <button class="filter-btn" onclick="filterLeads('legal', this)">Legal (3)</button>
+  <button class="filter-btn" onclick="filterLeads('construction', this)">Construction (3)</button>
+  <button class="filter-btn" onclick="filterLeads('financial', this)">Financial (2)</button>
+  <button class="filter-btn" onclick="filterLeads('strong', this)">⭐ Strong Fit Only (6)</button>
+</div>
+
+<div class="table-wrap">
+<table id="lead-table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Contact</th>
+      <th>Company</th>
+      <th>Industry</th>
+      <th>ICP Fit</th>
+      <th>Contact Info</th>
+      <th>Why Call</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <!-- 1. Rick Jones -->
+    <tr class="lead-row" data-industry="architecture" data-fit="strong" onclick="toggleDetail('d1', this)">
+      <td class="row-num">01</td>
+      <td>
+        <div class="lead-name">Rick Jones</div>
+        <div class="lead-title">President</div>
+        <a class="lead-linkedin" href="https://www.linkedin.com/in/rick-jones-0b62287/" target="_blank">↗ LinkedIn</a>
+      </td>
+      <td>
+        <div class="company-name">Jones Architecture, Inc.</div>
+        <div class="company-meta">37 employees &nbsp;·&nbsp; $1M–5M revenue</div>
+        <div class="company-address">10 Derby Square, Salem MA</div>
+      </td>
+      <td><span class="industry-pill ind-architecture">Architecture</span></td>
+      <td><span class="fit-badge fit-strong"><span class="fit-dot"></span>Strong</span></td>
+      <td>
+        <div class="contact-block">
+          <a class="contact-email" href="mailto:rick@jonesarch.com">✉ rick@jonesarch.com</a>
+          <a class="contact-phone" href="tel:+19787445200">📞 978-744-5200</a>
+          <div class="action-row">
+            <a class="action-btn btn-call" href="tel:+19787445200">Call</a>
+            <a class="action-btn btn-email" href="mailto:rick@jonesarch.com">Email</a>
+          </div>
+        </div>
+      </td>
+      <td class="hook-cell">President of a 37-person Salem architecture firm printing blueprints, permit sets, color renderings. +28% headcount over 3 years — equipment is lagging.</td>
+    </tr>
+    <tr class="detail-row" id="d1"><td colspan="7" class="detail-td"><div class="detail-content">
+      <div class="detail-section"><h4>About Jones Architecture</h4><p>Established architecture firm at 10 Derby Square in Salem, 37 employees, growing steadily (+28% over 3 years, +68% over 5 years). Specializes in learning environments, academic libraries, and commercial workplaces. Design-forward firm that values quality of output. Their printed work is client-facing.</p></div>
+      <div class="detail-section"><h4>Equipment Opportunity</h4><p>Architecture firms at this size typically run 2–4 MFPs plus wide-format for drawings. With 37 employees and ongoing growth, their print infrastructure is almost certainly undersized or aging. <strong>Canon imageRUNNER ADVANCE DX</strong> + uniFLOW print management is the natural pitch. Lead with TCO and document security.</p></div>
+      <div class="detail-section"><h4>Suggested Opener to Rick</h4><p><em>"Hi Rick — Jim Cross at Document Solutions in Beverly. We do print and document workflow for a number of architecture firms on the North Shore. Given the size of your team, I'd love to do a quick assessment — most firms we work with find they're spending 25–35% more than they need to. Could we grab 15 minutes?"</em></p></div>
+    </div></td></tr>
+
+    <!-- 2. Chris Vance -->
+    <tr class="lead-row" data-industry="architecture" data-fit="strong" onclick="toggleDetail('d2', this)">
+      <td class="row-num">02</td>
+      <td>
+        <div class="lead-name">Chris Vance AIA</div>
+        <div class="lead-title">Owner &amp; Principal</div>
+        <a class="lead-linkedin" href="https://www.linkedin.com/in/chris-vance-aia-mcppo-leed-ap-68393011/" target="_blank">↗ LinkedIn</a>
+      </td>
+      <td>
+        <div class="company-name">Vance Stein Architecture &amp; Interiors</div>
+        <div class="company-meta">11 employees &nbsp;·&nbsp; $5M–10M revenue</div>
+        <div class="company-address">Beverly, MA &nbsp;·&nbsp; Jim's hometown</div>
+      </td>
+      <td><span class="industry-pill ind-architecture">Architecture</span></td>
+      <td><span class="fit-badge fit-strong"><span class="fit-dot"></span>Strong</span></td>
+      <td>
+        <div class="contact-block">
+          <a class="contact-email" href="mailto:cvance@vancestein.com">✉ cvance@vancestein.com</a>
+          <a class="contact-phone" href="tel:+19785222600">📞 978-522-2600</a>
+          <div class="action-row">
+            <a class="action-btn btn-call" href="tel:+19785222600">Call</a>
+            <a class="action-btn btn-email" href="mailto:cvance@vancestein.com">Email</a>
+          </div>
+        </div>
+      </td>
+      <td class="hook-cell">🔥 Hottest lead. +57% headcount growth in 12 months. Beverly — same city as Jim. Owner is the decision maker. Architecture + interiors = color-critical print.</td>
+    </tr>
+    <tr class="detail-row" id="d2"><td colspan="7" class="detail-td"><div class="detail-content">
+      <div class="detail-section"><h4>Why This Is #1</h4><p>Vance Stein is the single fastest-growing firm in this list: +57% headcount in 12 months, +10% just last month. A firm growing that fast has almost certainly not kept pace with equipment. Full-service architecture + interior design means they're printing color renderings, material boards, and client presentations — output quality matters to them.</p></div>
+      <div class="detail-section"><h4>The Beverly Angle</h4><p>Chris Vance is in Beverly — Jim's backyard. This is an immediate conversation opener. <em>"We're literally neighbors — I've been serving North Shore firms for 30 years and I'd love to be your go-to for document equipment."</em> BDS in Beverly cannot say this with the same credibility.</p></div>
+      <div class="detail-section"><h4>Suggested Opener</h4><p><em>"Hi Chris — Jim Cross at Document Solutions, we're right here in Beverly. I work with several architecture and interiors firms on the North Shore and given how fast your team is growing, I wanted to reach out. I'd love to do a quick print assessment — your output quality needs are different from most offices. Would Tuesday work?"</em></p></div>
+    </div></td></tr>
+
+    <!-- 3. John Navins -->
+    <tr class="lead-row" data-industry="legal" data-fit="strong" onclick="toggleDetail('d3', this)">
+      <td class="row-num">03</td>
+      <td>
+        <div class="lead-name">John Navins</div>
+        <div class="lead-title">Partner (Founding)</div>
+        <a class="lead-linkedin" href="https://www.linkedin.com/in/john-navins-84a38714a/" target="_blank">↗ LinkedIn</a>
+      </td>
+      <td>
+        <div class="company-name">Tinti &amp; Navins, P.C.</div>
+        <div class="company-meta">16 attorneys &nbsp;·&nbsp; $5M–10M revenue</div>
+        <div class="company-address">27 Congress St, Suite 414, Salem MA</div>
+      </td>
+      <td><span class="industry-pill ind-legal">Legal</span></td>
+      <td><span class="fit-badge fit-strong"><span class="fit-dot"></span>Strong</span></td>
+      <td>
+        <div class="contact-block">
+          <a class="contact-email" href="mailto:jnavins@tintinavins.com">✉ jnavins@tintinavins.com</a>
+          <a class="contact-phone" href="tel:+17812370150">📞 781-237-0150</a>
+          <div class="action-row">
+            <a class="action-btn btn-call" href="tel:+17812370150">Call</a>
+            <a class="action-btn btn-email" href="mailto:jnavins@tintinavins.com">Email</a>
+          </div>
+        </div>
+      </td>
+      <td class="hook-cell">Founding partner — his name is on the door. 16 attorneys printing briefs, contracts, discovery docs daily. High-volume, compliance-sensitive. Best revenue potential on this list.</td>
+    </tr>
+    <tr class="detail-row" id="d3"><td colspan="7" class="detail-td"><div class="detail-content">
+      <div class="detail-section"><h4>About the Firm</h4><p>Tinti &amp; Navins formed in 2020 by merger of two established firms. John Navins co-founded King &amp; Navins in 1989 — 35+ years in practice. The merged firm has 16 lawyers and offices in Salem and Wellesley. Strong focus on real estate, estate planning, business law, and litigation. Firm has grown 43% in headcount over 3 years.</p></div>
+      <div class="detail-section"><h4>Print Opportunity</h4><p>16 attorneys + support staff = heavy daily print volume. Briefs, contracts, discovery packages, closing documents. Scan-to-case-management and secure print release are must-haves. A full managed print refresh here could be a $2,000–$4,000/month contract. <strong>Canon imageRUNNER ADVANCE DX + uniFLOW</strong> with document security is the pitch.</p></div>
+      <div class="detail-section"><h4>Note: Better First Call</h4><p>John Navins is the relationship target, but <strong>Kerri Welch (Business Manager)</strong> is the smarter first call — she controls vendor relationships and can shepherd the intro. Get Kerri's buy-in first, then let her bring it to John. See Lead #5.</p></div>
+    </div></td></tr>
+
+    <!-- 4. Christina Granese -->
+    <tr class="lead-row" data-industry="legal" data-fit="strong" onclick="toggleDetail('d4', this)">
+      <td class="row-num">04</td>
+      <td>
+        <div class="lead-name">Christina Granese</div>
+        <div class="lead-title">Partner</div>
+        <a class="lead-linkedin" href="https://www.linkedin.com/in/christina-granese-b3738680/" target="_blank">↗ LinkedIn</a>
+      </td>
+      <td>
+        <div class="company-name">Tinti &amp; Navins, P.C.</div>
+        <div class="company-meta">16 attorneys &nbsp;·&nbsp; $5M–10M revenue</div>
+        <div class="company-address">27 Congress St, Suite 414, Salem MA</div>
+      </td>
+      <td><span class="industry-pill ind-legal">Legal</span></td>
+      <td><span class="fit-badge fit-strong"><span class="fit-dot"></span>Strong</span></td>
+      <td>
+        <div class="contact-block">
+          <a class="contact-email" href="mailto:cmgranese@tintinavins.com">✉ cmgranese@tintinavins.com</a>
+          <a class="contact-phone" href="tel:+17812370150">📞 781-237-0150</a>
+          <div class="action-row">
+            <a class="action-btn btn-call" href="tel:+17812370150">Call</a>
+            <a class="action-btn btn-email" href="mailto:cmgranese@tintinavins.com">Email</a>
+          </div>
+        </div>
+      </td>
+      <td class="hook-cell">Second partner contact at Tinti &amp; Navins. Three paths into this firm: Kerri (operations), Christina (partner), John (founding). One of them converts.</td>
+    </tr>
+    <tr class="detail-row" id="d4"><td colspan="7" class="detail-td"><div class="detail-content">
+      <div class="detail-section"><h4>Multi-Touch Strategy</h4><p>With three named contacts at Tinti &amp; Navins, Jim has a sequenced multi-touch approach: (1) Call Kerri Welch as the operations/vendor contact, (2) If no response in 5 days, email Christina Granese as a partner, (3) If still no response, reach John Navins directly. One of these three will respond.</p></div>
+      <div class="detail-section"><h4>Email Angle for Christina</h4><p>As a partner, Christina responds to efficiency and professionalism framing. Suggested subject line: <em>"Print cost reduction for North Shore law firms"</em> — keeps it business-oriented, not vendor-y. Body: 3 sentences max, offer a 15-minute assessment, reference other law firms served on the North Shore.</p></div>
+      <div class="detail-section"><h4>LinkedIn</h4><p>Christina Granese joined as Partner in January 2023 — she's relatively new to the firm and may be in the process of evaluating or refreshing operational vendors. New partners often want to put their mark on operations. That's a conversation opener.</p></div>
+    </div></td></tr>
+
+    <!-- 5. Kerri Welch -->
+    <tr class="lead-row" data-industry="legal" data-fit="good" onclick="toggleDetail('d5', this)">
+      <td class="row-num">05</td>
+      <td>
+        <div class="lead-name">Kerri Welch</div>
+        <div class="lead-title">Business Manager</div>
+        <a class="lead-linkedin" href="https://www.linkedin.com/in/kerri-welch-a9b8218/" target="_blank">↗ LinkedIn</a>
+      </td>
+      <td>
+        <div class="company-name">Tinti &amp; Navins, P.C.</div>
+        <div class="company-meta">16 attorneys &nbsp;·&nbsp; $5M–10M revenue</div>
+        <div class="company-address">27 Congress St, Suite 414, Salem MA</div>
+      </td>
+      <td><span class="industry-pill ind-legal">Legal</span></td>
+      <td><span class="fit-badge fit-good"><span class="fit-dot"></span>Good</span></td>
+      <td>
+        <div class="contact-block">
+          <a class="contact-email" href="mailto:kwelch@tintinavins.com">✉ kwelch@tintinavins.com</a>
+          <a class="contact-phone" href="tel:+17812370150">📞 781-237-0150</a>
+          <div class="action-row">
+            <a class="action-btn btn-call" href="tel:+17812370150">Call</a>
+            <a class="action-btn btn-email" href="mailto:kwelch@tintinavins.com">Email</a>
+          </div>
+        </div>
+      </td>
+      <td class="hook-cell">⭐ Best first call at this firm. Business Manager = owns all vendor relationships. 10+ years tenure means she knows every contract. She'll know when the copier lease is up.</td>
+    </tr>
+    <tr class="detail-row" id="d5"><td colspan="7" class="detail-td"><div class="detail-content">
+      <div class="detail-section"><h4>Why Call Kerri First</h4><p>Kerri Welch has been Business Manager at Tinti &amp; Navins since August 2014 — over 10 years. She has been through at least two full copier lease cycles with this firm. She knows exactly what equipment they have, when the leases expire, and what the pain points are. She's the single best entry point into this account.</p></div>
+      <div class="detail-section"><h4>Conversation Guide</h4><p>Don't pitch equipment on the first call. Ask: <em>"Kerri, I work with a number of law firms on the North Shore on their print infrastructure. I'm not trying to sell you anything today — I just wanted to know, when does your current equipment lease come up for renewal? I'd love to be on your radar when that time comes."</em> Let her tell you the window. That's your close date.</p></div>
+      <div class="detail-section"><h4>Follow-Up Sequence</h4><p>Call → Voicemail → Email (same day) → LinkedIn connect (day 3) → Follow-up call (day 7). If she gives you a lease end date, set a reminder and call 90 days before. This is exactly the workflow Jim's Cowork kit automates with the Lease Watch Monday automation.</p></div>
+    </div></td></tr>
+
+    <!-- 6. Kayla Nassar -->
+    <tr class="lead-row" data-industry="construction" data-fit="good" onclick="toggleDetail('d6', this)">
+      <td class="row-num">06</td>
+      <td>
+        <div class="lead-name">Kayla Nassar</div>
+        <div class="lead-title">Chief Executive Officer</div>
+        <a class="lead-linkedin" href="https://www.linkedin.com/in/kayla-nassar-71b460107/" target="_blank">↗ LinkedIn</a>
+      </td>
+      <td>
+        <div class="company-name">AMCON</div>
+        <div class="company-meta">44 employees &nbsp;·&nbsp; Peabody, MA</div>
+        <div class="company-address">3 Mt Pleasant Dr, Peabody MA</div>
+      </td>
+      <td><span class="industry-pill ind-construction">Construction</span></td>
+      <td><span class="fit-badge fit-good"><span class="fit-dot"></span>Good</span></td>
+      <td>
+        <div class="contact-block">
+          <a class="contact-email" href="mailto:knassar@amconcorp.com">✉ knassar@amconcorp.com</a>
+          <a class="contact-phone" href="tel:+17815846178">📞 781-584-6178</a>
+          <div class="action-row">
+            <a class="action-btn btn-call" href="tel:+17815846178">Call</a>
+            <a class="action-btn btn-email" href="mailto:knassar@amconcorp.com">Email</a>
+          </div>
+        </div>
+      </td>
+      <td class="hook-cell">CEO of a 44-person Peabody construction firm. Progressive, growth-oriented company. +16% headcount in 12 months. Contracts, RFIs, submittals — high print volume.</td>
+    </tr>
+    <tr class="detail-row" id="d6"><td colspan="7" class="detail-td"><div class="detail-content">
+      <div class="detail-section"><h4>About AMCON</h4><p>AMCON is a "not-your-average" construction firm in Peabody, 44 employees, intentionally diverse leadership, bold brand. Kayla Nassar has been CEO since January 2024. The firm has grown 87% in headcount over 4 years. Their culture is forward-thinking — they'll respond to efficiency and innovation framing, not just price.</p></div>
+      <div class="detail-section"><h4>Print Opportunity</h4><p>Construction firms generate enormous document volume: contracts, change orders, RFIs, submittals, safety plans, drawings. A 44-person firm is likely spending $2,000–$5,000/month on print costs they're not actively managing. Scan-to-cloud (Procore, Google Drive) integration is a compelling differentiator for a tech-forward construction firm.</p></div>
+      <div class="detail-section"><h4>Approach</h4><p>Don't go to Kayla first — she's the CEO. Start with Jessica Nassar (Internal Operations Manager, Lead #7) who controls day-to-day vendor relationships. If Jessica doesn't move it in two weeks, email Kayla directly with a short efficiency pitch. CEOs of culture-forward companies respond to bold, no-fluff outreach.</p></div>
+    </div></td></tr>
+
+    <!-- 7. Jessica Nassar -->
+    <tr class="lead-row" data-industry="construction" data-fit="good" onclick="toggleDetail('d7', this)">
+      <td class="row-num">07</td>
+      <td>
+        <div class="lead-name">Jessica Nassar</div>
+        <div class="lead-title">Internal Operations Manager</div>
+        <a class="lead-linkedin" href="https://www.linkedin.com/in/jessica-nassar-4b7242141/" target="_blank">↗ LinkedIn</a>
+      </td>
+      <td>
+        <div class="company-name">AMCON</div>
+        <div class="company-meta">44 employees &nbsp;·&nbsp; Peabody, MA</div>
+        <div class="company-address">3 Mt Pleasant Dr, Peabody MA</div>
+      </td>
+      <td><span class="industry-pill ind-construction">Construction</span></td>
+      <td><span class="fit-badge fit-good"><span class="fit-dot"></span>Good</span></td>
+      <td>
+        <div class="contact-block">
+          <a class="contact-email" href="mailto:jnassar@amconcorp.com">✉ jnassar@amconcorp.com</a>
+          <a class="contact-phone" href="tel:+17815846178">📞 781-584-6178</a>
+          <div class="action-row">
+            <a class="action-btn btn-call" href="tel:+17815846178">Call</a>
+            <a class="action-btn btn-email" href="mailto:jnassar@amconcorp.com">Email</a>
+          </div>
+        </div>
+      </td>
+      <td class="hook-cell">⭐ Best first call at AMCON. Ops Manager since May 2021 — she owns all vendor relationships. Internal operations = she controls the print equipment contract.</td>
+    </tr>
+    <tr class="detail-row" id="d7"><td colspan="7" class="detail-td"><div class="detail-content">
+      <div class="detail-section"><h4>Why Jessica First</h4><p>Jessica Nassar has been Internal Operations Manager at AMCON since May 2021 — nearly 4 years. She's the person who manages office vendors, equipment contracts, and operational spending. She's also Kayla Nassar's likely family member (same last name), which means she's trusted, not just employed. This is the right front door.</p></div>
+      <div class="detail-section"><h4>Talking Points</h4><p>Lead with efficiency and integration: <em>"We work with construction firms on the North Shore to connect their print infrastructure to their project management workflows — Procore, Google Drive, that sort of thing. For a firm your size, there's usually 20–30% in cost savings sitting in unmanaged print. Can I show you what that looks like in 15 minutes?"</em></p></div>
+      <div class="detail-section"><h4>LinkedIn Note</h4><p>Jessica's LinkedIn profile shows Boxford, MA as her location — North Shore native. She's local. That's a soft rapport opener. AMCON's "bold" and "different" brand language also gives you permission to be direct. Don't be timid in your outreach here — they'll respect confidence.</p></div>
+    </div></td></tr>
+
+    <!-- 8. Patrick Coburn Jr. -->
+    <tr class="lead-row" data-industry="construction" data-fit="good" onclick="toggleDetail('d8', this)">
+      <td class="row-num">08</td>
+      <td>
+        <div class="lead-name">Patrick Coburn Jr.</div>
+        <div class="lead-title">Executive Vice President</div>
+        <a class="lead-linkedin" href="https://www.linkedin.com/in/patrick-coburn-jr-037517145/" target="_blank">↗ LinkedIn</a>
+      </td>
+      <td>
+        <div class="company-name">AMCON</div>
+        <div class="company-meta">44 employees &nbsp;·&nbsp; Peabody, MA</div>
+        <div class="company-address">3 Mt Pleasant Dr, Peabody MA</div>
+      </td>
+      <td><span class="industry-pill ind-construction">Construction</span></td>
+      <td><span class="fit-badge fit-good"><span class="fit-dot"></span>Good</span></td>
+      <td>
+        <div class="contact-block">
+          <a class="contact-email" href="mailto:pcoburn@amconcorp.com">✉ pcoburn@amconcorp.com</a>
+          <a class="contact-phone" href="tel:+17815846178">📞 781-584-6178</a>
+          <div class="action-row">
+            <a class="action-btn btn-call" href="tel:+17815846178">Call</a>
+            <a class="action-btn btn-email" href="mailto:pcoburn@amconcorp.com">Email</a>
+          </div>
+        </div>
+      </td>
+      <td class="hook-cell">EVP — escalation path if Jessica doesn't move it. Three contacts at AMCON: Jessica (ops) → Patrick (EVP) → Kayla (CEO). One of the three converts.</td>
+    </tr>
+    <tr class="detail-row" id="d8"><td colspan="7" class="detail-td"><div class="detail-content">
+      <div class="detail-section"><h4>Escalation Play</h4><p>Use the AMCON contacts in order: (1) Jessica Nassar — day 1, (2) If no response in 5 days, Patrick Coburn Jr. as EVP, (3) If still nothing after 2 weeks, Kayla Nassar CEO directly. This gives Jim three independent shots at the same company without coming across as spam.</p></div>
+      <div class="detail-section"><h4>Patrick's Role</h4><p>Patrick Coburn Jr. joined as EVP in January 2024 — same cohort as CEO Kayla Nassar. He's part of the new leadership team that is reshaping the company. New leadership = new vendor evaluations. EVP-level contacts can authorize equipment decisions without a lengthy committee process.</p></div>
+      <div class="detail-section"><h4>Location</h4><p>Patrick is based in Peabody — AMCON's home city. He's on-site regularly, not remote. That makes a drop-by possible if calls and emails don't land. Jim has Canon demo units — an in-person demo to a construction EVP in Peabody is a 20-minute drive from Beverly. Worth considering after 2 failed contact attempts.</p></div>
+    </div></td></tr>
+
+    <!-- 9. Glenn Wilson -->
+    <tr class="lead-row" data-industry="financial" data-fit="good" onclick="toggleDetail('d9', this)">
+      <td class="row-num">09</td>
+      <td>
+        <div class="lead-name">Glenn Wilson, RHU</div>
+        <div class="lead-title">Sr. Vice President, Employee Benefits</div>
+        <a class="lead-linkedin" href="https://www.linkedin.com/in/glenn-wilson-a95a46a4/" target="_blank">↗ LinkedIn</a>
+      </td>
+      <td>
+        <div class="company-name">Life Solutions Group</div>
+        <div class="company-meta">19 employees &nbsp;·&nbsp; Danvers, MA</div>
+        <div class="company-address">55 Ferncroft Rd, Suite 203, Danvers MA</div>
+      </td>
+      <td><span class="industry-pill ind-financial">Financial</span></td>
+      <td><span class="fit-badge fit-good"><span class="fit-dot"></span>Good</span></td>
+      <td>
+        <div class="contact-block">
+          <a class="contact-email" href="mailto:glenn.wilson@lsgadvisor.com">✉ glenn.wilson@lsgadvisor.com</a>
+          <a class="contact-phone" href="tel:+19786055200">📞 978-605-5200</a>
+          <div class="action-row">
+            <a class="action-btn btn-call" href="tel:+19786055200">Call</a>
+            <a class="action-btn btn-email" href="mailto:glenn.wilson@lsgadvisor.com">Email</a>
+          </div>
+        </div>
+      </td>
+      <td class="hook-cell">SVP at a financial advisory firm in Danvers. North Shore territory. Small firm (19 people) means one decision-maker, one call. Financial advisors print compliance-heavy docs constantly.</td>
+    </tr>
+    <tr class="detail-row" id="d9"><td colspan="7" class="detail-td"><div class="detail-content">
+      <div class="detail-section"><h4>About Life Solutions Group</h4><p>Independent financial advisory firm in Danvers, 19 employees, powered by The Fortis Companies. Glenn Wilson has been SVP of Employee Benefits since 2016 — nearly a decade. His RHU designation (Registered Health Underwriter) means compliance-heavy documentation is central to his work. Print quality and security matter here.</p></div>
+      <div class="detail-section"><h4>Equipment Opportunity</h4><p>Financial advisory firms print prospectuses, compliance disclosures, client reports, and benefits documentation. Smaller deal (19 people), but fast close cycle — one person can make the decision. A Canon color MFP with secure print and cloud integration fits well. Shorter sales cycle than the larger firms.</p></div>
+      <div class="detail-section"><h4>Pitch Angle</h4><p><em>"Glenn — Jim Cross at Document Solutions. We work with financial advisory and insurance firms on the North Shore on their document security and print infrastructure. Given the compliance documentation your team produces, I'd love to show you what firms similar to yours are doing. Can we talk for 15 minutes?"</em></p></div>
+    </div></td></tr>
+
+    <!-- 10. Maria Cacciola -->
+    <tr class="lead-row" data-industry="financial" data-fit="good" onclick="toggleDetail('d10', this)">
+      <td class="row-num">10</td>
+      <td>
+        <div class="lead-name">Maria Cacciola</div>
+        <div class="lead-title">VP Business Solutions</div>
+        <a class="lead-linkedin" href="https://www.linkedin.com/in/maria-cacciola-56aa43132/" target="_blank">↗ LinkedIn</a>
+      </td>
+      <td>
+        <div class="company-name">Life Solutions Group</div>
+        <div class="company-meta">19 employees &nbsp;·&nbsp; Danvers, MA</div>
+        <div class="company-address">55 Ferncroft Rd, Suite 203, Danvers MA</div>
+      </td>
+      <td><span class="industry-pill ind-financial">Financial</span></td>
+      <td><span class="fit-badge fit-good"><span class="fit-dot"></span>Good</span></td>
+      <td>
+        <div class="contact-block">
+          <a class="contact-email" href="mailto:maria.cacciola@lsgadvisor.com">✉ maria.cacciola@lsgadvisor.com</a>
+          <a class="contact-phone" href="tel:+19786055200">📞 978-605-5200</a>
+          <div class="action-row">
+            <a class="action-btn btn-call" href="tel:+19786055200">Call</a>
+            <a class="action-btn btn-email" href="mailto:maria.cacciola@lsgadvisor.com">Email</a>
+          </div>
+        </div>
+      </td>
+      <td class="hook-cell">"VP Business Solutions" = she manages operational vendor relationships. 7 years tenure. Call Maria before Glenn — she's more likely to own the equipment contract at this firm.</td>
+    </tr>
+    <tr class="detail-row" id="d10"><td colspan="7" class="detail-td"><div class="detail-content">
+      <div class="detail-section"><h4>Why Maria First</h4><p>Maria Cacciola has been VP Business Solutions since January 2017 — 7 years. Her title is explicitly operations/solutions-oriented, not client-facing. She's the vendor manager at this firm. Call Maria before Glenn. She controls the equipment contract decision and can shepherd it to the SVP if needed.</p></div>
+      <div class="detail-section"><h4>Danvers Location</h4><p>Life Solutions Group is at 55 Ferncroft Road in Danvers — right in Jim's primary service corridor. Jim can be at their office in 10 minutes from Beverly. Local service = a real competitive advantage for a firm this size. BDS has to dispatch from a larger operation. Jim shows up faster.</p></div>
+      <div class="detail-section"><h4>Suggested Opener</h4><p><em>"Hi Maria — Jim Cross at Document Solutions in Beverly. We service a lot of financial advisory offices in Danvers and the surrounding area. Given your role, I imagine document workflow and print infrastructure falls in your world. I'd love to do a quick assessment — most firms like yours find they're spending more than they need to. Would 15 minutes work this week?"</em></p></div>
+    </div></td></tr>
+
+  </tbody>
+</table>
+</div>
+
+<div class="action-plan">
+  <div>
+    <div class="action-plan-title">📋 Jim's Recommended Call Plan — This Week</div>
+    <div class="action-day"><strong>Monday AM:</strong> Call Chris Vance at Vance Stein (Beverly — home turf, fastest-growing, hottest lead)</div>
+    <div class="action-day"><strong>Monday PM:</strong> Call Rick Jones at Jones Architecture (Salem, 37 employees, strong print volume)</div>
+    <div class="action-day"><strong>Tuesday AM:</strong> Call Kerri Welch at Tinti &amp; Navins (law firm ops manager — ask about lease expiration date)</div>
+    <div class="action-day"><strong>Wednesday AM:</strong> Call Jessica Nassar at AMCON (construction ops manager, Peabody)</div>
+    <div class="action-day"><strong>Thursday AM:</strong> Call Maria Cacciola at Life Solutions Group (Danvers, financial advisory)</div>
+  </div>
+  <div class="fructify-badge">
+    <strong>💡 Powered by Fructify + Apollo + Clay + Explorium</strong>
+    This list was built in one session using Jim's Cowork kit — live data from 3 enrichment sources, 925-company pool, full contact records with verified emails.<br/><br/>
+    <strong>In Jim's kit:</strong> This runs automatically every Friday at 4 PM as the Weekly Prospect Brief.
+  </div>
+</div>
+
+<div class="footer">
+  Built by <a href="https://fructifyme.com">Fructify Solutions</a> for Document Solutions &nbsp;·&nbsp; Jim Cross &nbsp;·&nbsp; March 2026 &nbsp;·&nbsp;
+  Data: Apollo · Clay · Explorium &nbsp;·&nbsp; <a href="mailto:smilbury@fructifyme.com">smilbury@fructifyme.com</a>
+</div>
+
+<script>
+  function toggleDetail(id, clickedRow) {
+    const panel = document.getElementById(id);
+    const isOpen = panel.classList.contains('open');
+    document.querySelectorAll('.detail-row').forEach(r => r.classList.remove('open'));
+    document.querySelectorAll('.lead-row').forEach(r => r.style.background = '');
+    if (!isOpen) {
+      panel.classList.add('open');
+      clickedRow.style.background = '#eef4ff';
+    }
+  }
+
+  function filterLeads(filter, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.detail-row').forEach(r => r.classList.remove('open'));
+    document.querySelectorAll('.lead-row').forEach(r => r.style.background = '');
+    document.querySelectorAll('.lead-row').forEach(row => {
+      const industry = row.dataset.industry;
+      const fit = row.dataset.fit;
+      let show = false;
+      if (filter === 'all') show = true;
+      else if (filter === 'strong') show = fit === 'strong';
+      else show = industry === filter;
+      row.style.display = show ? '' : 'none';
+    });
+    // hide orphaned detail rows
+    document.querySelectorAll('.detail-row').forEach(r => r.style.display = '');
+  }
+</script>
+</body>
+</html>

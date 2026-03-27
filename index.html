@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Document Solutions — AI Operations Hub</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--navy:#0f2240;--blue:#1a4a8a;--accent:#e8520a;--light:#f4f7fb;--text:#1e293b;--muted:#64748b}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:var(--light);color:var(--text)}
+
+  /* NAV */
+  nav{background:var(--navy);padding:14px 48px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .nav-brand{display:flex;align-items:center;gap:12px}
+  .nav-logo{width:36px;height:36px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:white}
+  .nav-title{color:white;font-size:16px;font-weight:700}
+  .nav-subtitle{color:#a8b8d8;font-size:11px}
+  .nav-badge{background:rgba(232,82,10,0.2);border:1px solid rgba(232,82,10,0.4);color:#ffa07a;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,var(--navy) 0%,#16306a 60%,var(--blue) 100%);color:white;padding:72px 48px 64px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:rgba(232,82,10,0.08)}
+  .hero::after{content:'';position:absolute;bottom:-80px;left:-40px;width:240px;height:240px;border-radius:50%;background:rgba(26,74,138,0.3)}
+  .hero-eyebrow{display:inline-block;background:rgba(232,82,10,0.2);border:1px solid rgba(232,82,10,0.4);color:#ffa07a;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:0.5px;margin-bottom:20px;position:relative;z-index:1}
+  .hero h1{font-size:42px;font-weight:800;letter-spacing:-0.5px;line-height:1.15;margin-bottom:16px;position:relative;z-index:1}
+  .hero h1 span{color:#ff9a6c}
+  .hero p{font-size:18px;color:#a8c4e8;max-width:580px;margin:0 auto 36px;line-height:1.6;position:relative;z-index:1}
+  .hero-stats{display:flex;gap:40px;justify-content:center;position:relative;z-index:1;flex-wrap:wrap}
+  .hero-stat{text-align:center}
+  .hero-stat-val{font-size:28px;font-weight:800;color:white}
+  .hero-stat-label{font-size:12px;color:#a8b8d8;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px}
+
+  /* SECTION */
+  section{padding:64px 48px}
+  .section-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-weight:700;margin-bottom:8px}
+  .section-title{font-size:28px;font-weight:800;color:var(--navy);margin-bottom:8px;line-height:1.2}
+  .section-sub{font-size:15px;color:var(--muted);margin-bottom:40px;max-width:560px;line-height:1.6}
+
+  /* DELIVERABLES GRID */
+  .deliverables{background:white}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+  .card{border:1.5px solid #e2e8f0;border-radius:16px;padding:28px;position:relative;transition:all 0.2s;cursor:pointer;text-decoration:none;display:block;color:inherit;overflow:hidden}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;border-radius:16px 16px 0 0}
+  .card.c-leads::before{background:linear-gradient(90deg,#0f3460,#1a6aaa)}
+  .card.c-tco::before{background:linear-gradient(90deg,#e8520a,#ff8c42)}
+  .card.c-renewal::before{background:linear-gradient(90deg,#16803d,#34d399)}
+  .card.c-outreach::before{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+  .card:hover{border-color:#cbd5e1;transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,0.08)}
+  .card-icon{font-size:32px;margin-bottom:14px}
+  .card-title{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:6px}
+  .card-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+  .card-tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#f1f5f9;color:#475569}
+  .card-cta{display:inline-flex;align-items:center;gap:6px;margin-top:16px;font-size:13px;font-weight:700;color:var(--blue)}
+  .card-cta:hover{text-decoration:underline}
+  .card-badge{position:absolute;top:16px;right:16px;background:#fef9c3;color:#854d0e;font-size:10px;font-weight:700;padding:3px 8px;border-radius:8px;text-transform:uppercase}
+  .card-badge.live{background:#dcfce7;color:#166534}
+
+  /* HOW IT WORKS */
+  .how{background:var(--light)}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;position:relative}
+  .steps::before{content:'';position:absolute;top:32px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,var(--blue),var(--accent));z-index:0}
+  .step{text-align:center;padding:0 20px;position:relative;z-index:1}
+  .step-num{width:64px;height:64px;border-radius:50%;background:white;border:2px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--blue);margin:0 auto 16px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+  .step-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px}
+  .step-desc{font-size:12px;color:var(--muted);line-height:1.6}
+
+  /* CAPABILITIES */
+  .capabilities-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  .cap{background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;display:flex;align-items:flex-start;gap:14px}
+  .cap-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+  .cap-title{font-size:14px;font-weight:700;color:var(--navy);margin-bottom:3px}
+  .cap-desc{font-size:12px;color:var(--muted);line-height:1.5}
+
+  /* CTA BANNER */
+  .cta-banner{background:linear-gradient(135deg,var(--navy),var(--blue));color:white;text-align:center;padding:64px 48px}
+  .cta-banner h2{font-size:30px;font-weight:800;margin-bottom:12px}
+  .cta-banner p{color:#a8c4e8;font-size:16px;max-width:480px;margin:0 auto 32px;line-height:1.6}
+  .cta-btn{display:inline-block;background:var(--accent);color:white;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;transition:background 0.15s}
+  .cta-btn:hover{background:#c94108}
+
+  /* FOOTER */
+  footer{background:#0a1628;color:#64748b;padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:12px}
+  footer a{color:#a8b8d8;text-decoration:none}
+
+  @media(max-width:768px){
+    nav,section,.hero,.cta-banner,footer{padding-left:20px;padding-right:20px}
+    .hero h1{font-size:28px}
+    .steps::before{display:none}
+    .hero-stats{gap:24px}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo">DS</div>
+    <div>
+      <div class="nav-title">Document Solutions</div>
+      <div class="nav-subtitle">AI Operations Hub &nbsp;·&nbsp; Jim Cross</div>
+    </div>
+  </div>
+  <div class="nav-badge">⚡ Powered by Claude Cowork</div>
+</nav>
+
+<div class="hero">
+  <div class="hero-eyebrow">Fructify Solutions × Document Solutions</div>
+  <h1>Your AI Copilot,<br/><span>Built for Your Business</span></h1>
+  <p>Everything you see here was generated by your Claude Cowork kit — live lead data, interactive tools, and outreach that sounds like you. This is what runs automatically, every week.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-val">925</div><div class="hero-stat-label">Lead Pool (Apollo)</div></div>
+    <div class="hero-stat"><div class="hero-stat-val">10</div><div class="hero-stat-label">Enriched Contacts</div></div>
+    <div class="hero-stat"><div class="hero-stat-val">4</div><div class="hero-stat-label">Live Tools</div></div>
+    <div class="hero-stat"><div class="hero-stat-val">30+</div><div class="hero-stat-label">Years, Jim's Expertise</div></div>
+  </div>
+</div>
+
+<section class="deliverables">
+  <div class="section-label">What Your Kit Delivers</div>
+  <div class="section-title">Live Tools & Deliverables</div>
+  <div class="section-sub">These aren't mockups. Every tool below is functional, branded for Document Solutions, and ready for Jim to use with real customers today.</div>
+  <div class="grid">
+
+    <a class="card c-leads" href="leads.html">
+      <div class="card-badge live">Live Data</div>
+      <div class="card-icon">📊</div>
+      <div class="card-title">North Shore Lead Dashboard</div>
+      <div class="card-desc">10 enriched prospects with full names, verified emails, phone numbers, and personalized call hooks — all sourced live from Apollo, Clay, and Explorium against a 925-company pool.</div>
+      <div class="card-tags"><span class="tag">Apollo</span><span class="tag">Clay</span><span class="tag">Explorium</span><span class="tag">Live data</span></div>
+      <div class="card-cta">Open Dashboard →</div>
+    </a>
+
+    <a class="card c-tco" href="tco-calculator.html">
+      <div class="card-badge live">Interactive</div>
+      <div class="card-icon">🧮</div>
+      <div class="card-title">TCO Calculator</div>
+      <div class="card-desc">Client-facing tool Jim shares during sales calls or embeds in proposals. Customer enters their current setup; the tool shows total cost of ownership vs. a new Canon solution. Turns a price conversation into an ROI conversation.</div>
+      <div class="card-tags"><span class="tag">Sales tool</span><span class="tag">Client-facing</span><span class="tag">Canon</span></div>
+      <div class="card-cta">Open Calculator →</div>
+    </a>
+
+    <a class="card c-renewal" href="renewal-tracker.html">
+      <div class="card-badge">Demo</div>
+      <div class="card-icon">📅</div>
+      <div class="card-title">Lease Renewal Tracker</div>
+      <div class="card-desc">Every active customer, their Canon equipment, and their lease expiration date — color-coded by urgency. Jim's Cowork kit scans this every Monday at 7:30 AM and drafts renewal outreach automatically.</div>
+      <div class="card-tags"><span class="tag">Automation</span><span class="tag">Renewals</span><span class="tag">Monday brief</span></div>
+      <div class="card-cta">Open Tracker →</div>
+    </a>
+
+    <a class="card c-outreach" href="outreach.html">
+      <div class="card-badge">Demo</div>
+      <div class="card-icon">✉️</div>
+      <div class="card-title">AI Outreach Templates</div>
+      <div class="card-desc">Cold prospecting emails, lease renewal messages, and post-service follow-ups — all written in Jim's voice, personalized to the customer's industry, equipment, and relationship history. Ready to send in 90 seconds.</div>
+      <div class="card-tags"><span class="tag">Cold outreach</span><span class="tag">Renewals</span><span class="tag">Service follow-up</span></div>
+      <div class="card-cta">View Templates →</div>
+    </a>
+
+  </div>
+</section>
+
+<section class="how">
+  <div class="section-label">How It Works</div>
+  <div class="section-title">From Setup to Running in Under 15 Minutes</div>
+  <div class="section-sub">Your kit is pre-built with everything Claude needs to know about Document Solutions — your customers, your Canon products, your voice, your territory.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Download the Kit</div>
+      <div class="step-desc">Fructify delivers a ZIP file with your memory profile, brand voice doc, and all custom tools pre-configured.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Point Cowork at It</div>
+      <div class="step-desc">Unzip the folder, open Claude Cowork, and select it as your project directory. That's the full setup.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Connect Your Tools</div>
+      <div class="step-desc">Link Outlook, QuickBooks, and e-Automate via one-click connectors. Claude reads your data directly.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">It Runs Itself</div>
+      <div class="step-desc">Monday Lease Watch, Friday Prospect Brief, and Monthly Revenue Digest run automatically. Jim just reviews and acts.</div>
+    </div>
+  </div>
+</section>
+
+<section style="background:white">
+  <div class="section-label">Full Capability Stack</div>
+  <div class="section-title">What Your Kit Can Do</div>
+  <div class="section-sub">Every capability below is available to Jim on day one — no setup beyond the initial kit installation.</div>
+  <div class="capabilities-grid">
+    <div class="cap"><div class="cap-icon">📝</div><div><div class="cap-title">Proposal Generation</div><div class="cap-desc">Full Canon equipment proposal with three tiers, TCO comparison, and lease structure — drafted in under 2 minutes from a customer name.</div></div></div>
+    <div class="cap"><div class="cap-icon">🔁</div><div><div class="cap-title">Lease Renewal Automation</div><div class="cap-desc">Monday morning scan of all active leases. Personalized renewal emails drafted for every account expiring in 90 days.</div></div></div>
+    <div class="cap"><div class="cap-icon">🔍</div><div><div class="cap-title">North Shore Prospecting</div><div class="cap-desc">Weekly prospect brief with 5 targeted businesses, contact names, and ready-to-send first-touch emails — every Friday at 4 PM.</div></div></div>
+    <div class="cap"><div class="cap-icon">🛠️</div><div><div class="cap-title">Service Follow-Up</div><div class="cap-desc">After a technician completes a service call, Jim says the word — Cowork drafts the follow-up and Google review request in 90 seconds.</div></div></div>
+    <div class="cap"><div class="cap-icon">📊</div><div><div class="cap-title">Monthly Revenue Digest</div><div class="cap-desc">1st of each month: open proposals, service contract revenue, overdue meter reads, and new customers added — one summary email.</div></div></div>
+    <div class="cap"><div class="cap-icon">⚖️</div><div><div class="cap-title">NJM Consulting Proposals</div><div class="cap-desc">Full workflow consulting proposals for Jim's NJM Consulting work — current state, uniFLOW recommendations, projected savings, and implementation plan.</div></div></div>
+    <div class="cap"><div class="cap-icon">🧩</div><div><div class="cap-title">Competitive Intelligence</div><div class="cap-desc">Quarterly pulse on BDS, NBM, and other North Shore dealers — new services, pricing signals, and hiring activity flagged automatically.</div></div></div>
+    <div class="cap"><div class="cap-icon">🤝</div><div><div class="cap-title">Outlook Integration</div><div class="cap-desc">Claude reads Jim's inbox, flags renewal-related threads, and drafts replies — without Jim having to copy-paste anything.</div></div></div>
+  </div>
+</section>
+
+<div class="cta-banner">
+  <h2>Ready to See It Live?</h2>
+  <p>Everything on this page was built in a single Cowork session. Your kit delivers this — and more — every week, automatically.</p>
+  <a class="cta-btn" href="mailto:smilbury@fructifyme.com">Talk to Mike at Fructify →</a>
+</div>
+
+<footer>
+  <div>Document Solutions &nbsp;·&nbsp; Jim Cross &nbsp;·&nbsp; Beverly, MA &nbsp;·&nbsp; <a href="tel:+19789270585">978-927-0585</a></div>
+  <div>Built by <a href="https://fructifyme.com">Fructify Solutions</a> &nbsp;·&nbsp; Powered by Claude Cowork</div>
+</footer>
+
+</body>
+</html>

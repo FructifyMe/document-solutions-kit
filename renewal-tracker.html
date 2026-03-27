@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lease Renewal Tracker — Document Solutions</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--navy:#0f2240;--blue:#1a4a8a;--accent:#e8520a;--green:#16803d}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f7fb;color:#1e293b}
+  nav{background:var(--navy);padding:14px 40px;display:flex;align-items:center;justify-content:space-between}
+  .nav-brand{color:white;font-size:15px;font-weight:700}
+  .nav-back{color:#a8b8d8;font-size:13px;text-decoration:none}
+  .nav-back:hover{color:white}
+  .hero{background:linear-gradient(135deg,var(--navy),#16536a);color:white;padding:44px 40px 36px;text-align:center}
+  .hero-eye{display:inline-block;background:rgba(22,128,61,0.25);border:1px solid rgba(52,211,153,0.3);color:#6ee7b7;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:600;margin-bottom:14px}
+  .hero h1{font-size:30px;font-weight:800;margin-bottom:8px}
+  .hero p{color:#a8c4e8;font-size:14px;max-width:500px;margin:0 auto}
+
+  .stats-bar{background:white;border-bottom:1px solid #e2e8f0;padding:16px 40px;display:flex;gap:40px;flex-wrap:wrap}
+  .stat{text-align:center}
+  .stat-val{font-size:22px;font-weight:700}
+  .stat-val.red{color:#dc2626}
+  .stat-val.yellow{color:#d97706}
+  .stat-val.green{color:var(--green)}
+  .stat-val.blue{color:var(--blue)}
+  .stat-label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.4px;margin-top:2px}
+
+  .filters{padding:16px 40px 0;display:flex;gap:10px;flex-wrap:wrap}
+  .filter-btn{padding:7px 16px;border-radius:20px;border:1.5px solid #cbd5e1;background:white;font-size:12px;cursor:pointer;color:#475569;transition:all 0.15s}
+  .filter-btn.active,.filter-btn:hover{background:var(--navy);border-color:var(--navy);color:white}
+
+  .wrap{padding:20px 40px 48px;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05);min-width:800px}
+  thead tr{background:#f8fafc}
+  thead th{text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;font-weight:600;border-bottom:2px solid #e2e8f0}
+  tbody tr{border-bottom:1px solid #f1f5f9;transition:background 0.1s}
+  tbody tr:hover{background:#f8faff}
+  tbody tr:last-child{border-bottom:none}
+  td{padding:14px 16px;font-size:13px;vertical-align:middle}
+
+  .customer-name{font-weight:700;color:#1e293b;font-size:14px}
+  .customer-type{color:#64748b;font-size:11px;margin-top:1px}
+  .equipment{font-weight:600;color:var(--navy);font-size:13px}
+  .equipment-sub{color:#94a3b8;font-size:11px;margin-top:1px}
+
+  .urgency{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700}
+  .urgency-dot{width:7px;height:7px;border-radius:50%}
+  .u-critical{background:#fee2e2;color:#991b1b}
+  .u-critical .urgency-dot{background:#dc2626}
+  .u-soon{background:#fef9c3;color:#854d0e}
+  .u-soon .urgency-dot{background:#d97706}
+  .u-ok{background:#dcfce7;color:#166534}
+  .u-ok .urgency-dot{background:#16a34a}
+
+  .days-badge{font-size:13px;font-weight:700}
+  .days-badge.red{color:#dc2626}
+  .days-badge.yellow{color:#d97706}
+  .days-badge.green{color:var(--green)}
+
+  .action-btns{display:flex;gap:6px}
+  .act-btn{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1.5px solid;cursor:pointer;text-decoration:none;display:inline-block;transition:all 0.12s}
+  .btn-draft{background:white;border-color:var(--accent);color:var(--accent)}
+  .btn-draft:hover{background:var(--accent);color:white}
+  .btn-call{background:white;border-color:var(--navy);color:var(--navy)}
+  .btn-call:hover{background:var(--navy);color:white}
+
+  .auto-note{background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:16px 20px;margin:0 40px 24px;display:flex;align-items:center;gap:14px;font-size:13px;color:#166534}
+  .auto-icon{font-size:22px}
+
+  footer{text-align:center;padding:28px;font-size:12px;color:#94a3b8}
+  footer a{color:var(--blue);text-decoration:none}
+  @media(max-width:768px){nav,.stats-bar,.filters,.wrap,.auto-note{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">📅 Document Solutions — Lease Renewal Tracker</div>
+  <a class="nav-back" href="index.html">← Back to Hub</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-eye">🤖 Monday Morning Auto-Brief · 7:30 AM</div>
+  <h1>Lease Renewal Tracker</h1>
+  <p>Every active customer, their Canon equipment, and their lease expiration — sorted by urgency. Claude scans this every Monday and drafts outreach for the accounts expiring within 90 days.</p>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-val red">3</div><div class="stat-label">🔴 Critical (< 60 days)</div></div>
+  <div class="stat"><div class="stat-val yellow">4</div><div class="stat-label">🟡 Coming Up (60–120 days)</div></div>
+  <div class="stat"><div class="stat-val green">8</div><div class="stat-label">🟢 On Track (> 120 days)</div></div>
+  <div class="stat"><div class="stat-val blue">15</div><div class="stat-label">Total Active Accounts</div></div>
+</div>
+
+<div class="auto-note">
+  <div class="auto-icon">⚡</div>
+  <div><strong>Monday Lease Watch ran today at 7:30 AM.</strong> Renewal emails were drafted for Harborlight Community Partners, North Shore Dermatology, and Kline Law Group. Review and send from your Outlook draft folder.</div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="filterRows('all',this)">All Accounts (15)</button>
+  <button class="filter-btn" onclick="filterRows('critical',this)">🔴 Critical (3)</button>
+  <button class="filter-btn" onclick="filterRows('soon',this)">🟡 Coming Up (4)</button>
+  <button class="filter-btn" onclick="filterRows('ok',this)">🟢 On Track (8)</button>
+</div>
+
+<div class="wrap">
+<table>
+  <thead>
+    <tr>
+      <th>Customer</th>
+      <th>Equipment</th>
+      <th>Location</th>
+      <th>Lease Expires</th>
+      <th>Days Left</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="renewal-body">
+    <tr data-status="critical"><td><div class="customer-name">Harborlight Community Partners</div><div class="customer-type">Nonprofit · Beverly</div></td><td><div class="equipment">Canon iR-ADV DX C5850i</div><div class="equipment-sub">Install: Mar 2021 · 60mo lease</div></td><td>Beverly, MA</td><td>May 14, 2026</td><td><div class="days-badge red">47 days</div></td><td><span class="urgency u-critical"><span class="urgency-dot"></span>Critical</span></td><td><div class="action-btns"><a class="act-btn btn-draft" href="#">Draft Renewal</a><a class="act-btn btn-call" href="tel:+19789270585">Call</a></div></td></tr>
+    <tr data-status="critical"><td><div class="customer-name">North Shore Dermatology</div><div class="customer-type">Medical Practice · Danvers</div></td><td><div class="equipment">Canon iR-ADV DX 4951i</div><div class="equipment-sub">Install: Jun 2021 · 60mo lease</div></td><td>Danvers, MA</td><td>Jun 1, 2026</td><td><div class="days-badge red">65 days</div></td><td><span class="urgency u-critical"><span class="urgency-dot"></span>Critical</span></td><td><div class="action-btns"><a class="act-btn btn-draft" href="#">Draft Renewal</a><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="critical"><td><div class="customer-name">Kline Law Group</div><div class="customer-type">Law Firm · Marblehead</div></td><td><div class="equipment">Canon iR-ADV DX C3835i</div><div class="equipment-sub">Install: Apr 2021 · 60mo lease</div></td><td>Marblehead, MA</td><td>Jun 18, 2026</td><td><div class="days-badge red">82 days</div></td><td><span class="urgency u-critical"><span class="urgency-dot"></span>Critical</span></td><td><div class="action-btns"><a class="act-btn btn-draft" href="#">Draft Renewal</a><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="soon"><td><div class="customer-name">Peabody Essex Realty Group</div><div class="customer-type">Real Estate · Peabody</div></td><td><div class="equipment">Canon iR-ADV C5840i</div><div class="equipment-sub">Install: Jul 2022 · 48mo lease</div></td><td>Peabody, MA</td><td>Jul 5, 2026</td><td><div class="days-badge yellow">99 days</div></td><td><span class="urgency u-soon"><span class="urgency-dot"></span>Coming Up</span></td><td><div class="action-btns"><a class="act-btn btn-draft" href="#">Draft Renewal</a><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="soon"><td><div class="customer-name">Gloucester Pediatrics</div><div class="customer-type">Medical Practice · Gloucester</div></td><td><div class="equipment">Canon iR-ADV DX C3830i</div><div class="equipment-sub">Install: Aug 2022 · 48mo lease</div></td><td>Gloucester, MA</td><td>Jul 28, 2026</td><td><div class="days-badge yellow">122 days</div></td><td><span class="urgency u-soon"><span class="urgency-dot"></span>Coming Up</span></td><td><div class="action-btns"><a class="act-btn btn-draft" href="#">Draft Renewal</a><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="soon"><td><div class="customer-name">Newburyport Athletic Club</div><div class="customer-type">Athletics · Newburyport</div></td><td><div class="equipment">Canon iR-ADV DX 6870i</div><div class="equipment-sub">Install: Sep 2022 · 48mo lease</div></td><td>Newburyport, MA</td><td>Aug 12, 2026</td><td><div class="days-badge yellow">137 days</div></td><td><span class="urgency u-soon"><span class="urgency-dot"></span>Coming Up</span></td><td><div class="action-btns"><a class="act-btn btn-draft" href="#">Draft Renewal</a><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="soon"><td><div class="customer-name">Salem Manufacturing Co.</div><div class="customer-type">Manufacturing · Salem</div></td><td><div class="equipment">Canon iR-ADV DX C5870i</div><div class="equipment-sub">Install: Oct 2022 · 48mo lease</div></td><td>Salem, MA</td><td>Aug 31, 2026</td><td><div class="days-badge yellow">156 days</div></td><td><span class="urgency u-soon"><span class="urgency-dot"></span>Coming Up</span></td><td><div class="action-btns"><a class="act-btn btn-draft" href="#">Draft Renewal</a><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="ok"><td><div class="customer-name">Beverly Cooperative Bank</div><div class="customer-type">Financial · Beverly</div></td><td><div class="equipment">Canon iR-ADV DX C3830i (×2)</div><div class="equipment-sub">Install: Jan 2023 · 60mo lease</div></td><td>Beverly, MA</td><td>Jan 2028</td><td><div class="days-badge green">646 days</div></td><td><span class="urgency u-ok"><span class="urgency-dot"></span>On Track</span></td><td><div class="action-btns"><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="ok"><td><div class="customer-name">North Shore Oral Surgery</div><div class="customer-type">Medical · Beverly</div></td><td><div class="equipment">Canon iR-ADV 4951i</div><div class="equipment-sub">Install: Feb 2023 · 60mo lease</div></td><td>Beverly, MA</td><td>Feb 2028</td><td><div class="days-badge green">678 days</div></td><td><span class="urgency u-ok"><span class="urgency-dot"></span>On Track</span></td><td><div class="action-btns"><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="ok"><td><div class="customer-name">Danvers Insurance Group</div><div class="customer-type">Insurance · Danvers</div></td><td><div class="equipment">Canon iR-ADV DX C5850i</div><div class="equipment-sub">Install: Mar 2023 · 60mo lease</div></td><td>Danvers, MA</td><td>Mar 2028</td><td><div class="days-badge green">708 days</div></td><td><span class="urgency u-ok"><span class="urgency-dot"></span>On Track</span></td><td><div class="action-btns"><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="ok"><td><div class="customer-name">Essex County Legal Aid</div><div class="customer-type">Nonprofit Legal · Salem</div></td><td><div class="equipment">Canon iR-ADV DX C3835i</div><div class="equipment-sub">Install: Apr 2023 · 60mo lease</div></td><td>Salem, MA</td><td>Apr 2028</td><td><div class="days-badge green">739 days</div></td><td><span class="urgency u-ok"><span class="urgency-dot"></span>On Track</span></td><td><div class="action-btns"><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="ok"><td><div class="customer-name">Marblehead Family Medicine</div><div class="customer-type">Medical Practice · Marblehead</div></td><td><div class="equipment">Canon iR-ADV DX 4951i</div><div class="equipment-sub">Install: Jun 2023 · 60mo lease</div></td><td>Marblehead, MA</td><td>Jun 2028</td><td><div class="days-badge green">800 days</div></td><td><span class="urgency u-ok"><span class="urgency-dot"></span>On Track</span></td><td><div class="action-btns"><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="ok"><td><div class="customer-name">Rowley Architecture Studio</div><div class="customer-type">Architecture · Rowley</div></td><td><div class="equipment">Canon iR-ADV DX C5870i</div><div class="equipment-sub">Install: Aug 2023 · 60mo lease</div></td><td>Rowley, MA</td><td>Aug 2028</td><td><div class="days-badge green">862 days</div></td><td><span class="urgency u-ok"><span class="urgency-dot"></span>On Track</span></td><td><div class="action-btns"><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="ok"><td><div class="customer-name">Ipswich Town Hall</div><div class="customer-type">Municipal · Ipswich</div></td><td><div class="equipment">Canon iR-ADV DX 6870i (×3)</div><div class="equipment-sub">Install: Oct 2023 · 60mo lease</div></td><td>Ipswich, MA</td><td>Oct 2028</td><td><div class="days-badge green">924 days</div></td><td><span class="urgency u-ok"><span class="urgency-dot"></span>On Track</span></td><td><div class="action-btns"><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+    <tr data-status="ok"><td><div class="customer-name">Gloucester Real Estate Group</div><div class="customer-type">Real Estate · Gloucester</div></td><td><div class="equipment">Canon iR-ADV DX C3830i</div><div class="equipment-sub">Install: Dec 2023 · 60mo lease</div></td><td>Gloucester, MA</td><td>Dec 2028</td><td><div class="days-badge green">985 days</div></td><td><span class="urgency u-ok"><span class="urgency-dot"></span>On Track</span></td><td><div class="action-btns"><a class="act-btn btn-call" href="#">Call</a></div></td></tr>
+  </tbody>
+</table>
+</div>
+
+<footer>
+  <a href="index.html">← Document Solutions AI Hub</a> &nbsp;·&nbsp; Jim Cross, Owner — Document Solutions, Beverly MA &nbsp;·&nbsp; Monday Lease Watch runs automatically every Monday at 7:30 AM
+</footer>
+
+<script>
+function filterRows(status, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#renewal-body tr').forEach(row => {
+    row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
